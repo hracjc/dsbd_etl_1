@@ -71,6 +71,7 @@ def extract_source(
     source: Source,
     cfg: Config,
     state: dict[tuple[str, str, str], dict] | None = None,
+    force: bool = False,
 ) -> list[dict]:
     """Descarga solo peticiones sin resultado exitoso previo."""
     rows: list[dict] = []
@@ -93,7 +94,7 @@ def extract_source(
             "filename": filename,
         }
         previous = latest.get(_state_key(request))
-        if (
+        if not force and (
             previous
             and previous["status"] == "success"
             and (RAW / previous["filename"]).is_file()
@@ -145,14 +146,14 @@ def extract_source(
     return rows
 
 
-def run_extract(cfg: Config | None = None) -> Path:
+def run_extract(cfg: Config | None = None, force: bool = False) -> Path:
     cfg = cfg or load_config()
     ensure_dirs()
     all_rows: list[dict] = []
     state = _load_state()
     for source in cfg.sources:
         print(f"[extract] {source.id} — {source.name}")
-        all_rows.extend(extract_source(source, cfg, state))
+        all_rows.extend(extract_source(source, cfg, state, force=force))
 
     with MANIFEST.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=FIELDNAMES)

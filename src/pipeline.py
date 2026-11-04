@@ -4,6 +4,7 @@ Uso (desde practica_01_starter/):
 
     python -m src.pipeline
     python -m src.pipeline --skip-extract   # reusa data/raw/
+    python -m src.pipeline --force          # vuelve a descargar todo
     python -m src.pipeline --parquet
 """
 
@@ -19,10 +20,16 @@ from .transform import run_transform
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="ETL observatorio país (P1)")
-    parser.add_argument(
+    extract_options = parser.add_mutually_exclusive_group()
+    extract_options.add_argument(
         "--skip-extract",
         action="store_true",
         help="No descargar; transformar desde data/raw/ existente",
+    )
+    extract_options.add_argument(
+        "--force",
+        action="store_true",
+        help="Volver a descargar todas las fuentes, incluso las cacheadas",
     )
     parser.add_argument(
         "--parquet",
@@ -32,7 +39,10 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
 
     if not args.skip_extract:
-        run_extract()
+        if args.force:
+            run_extract(force=True)
+        else:
+            run_extract()
     else:
         print("[pipeline] extract omitido (--skip-extract)")
 
