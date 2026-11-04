@@ -118,7 +118,8 @@ def extract_source(
             )
             status = response.status_code
             nbytes = len(response.content)
-            response.raise_for_status()
+            if status >= 400:
+                raise requests.HTTPError(f"HTTP {status}", response=response)
             dest.write_bytes(response.content)
             result = "success"
         except requests.RequestException as exc:
