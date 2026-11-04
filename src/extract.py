@@ -14,7 +14,7 @@ import requests
 from .config import Config, Source, load_config
 from .paths import EXTRACT_STATE_PATH, MANIFEST, RAW, ensure_dirs
 
-USER_AGENT = "UCJC-DSBD-practica1/1.2 (educational ETL framework)"
+USER_AGENT = "hracjc-UCJC-DSBD-practica1/1.2"
 TIMEOUT = 60
 FIELDNAMES = [
     "timestamp_utc",
@@ -108,7 +108,7 @@ def extract_source(
         now = datetime.now(timezone.utc).isoformat()
         status = 0
         nbytes = 0
-        result = "failure"
+        result = "failure, retry later"
         note = ""
         try:
             response = requests.get(
