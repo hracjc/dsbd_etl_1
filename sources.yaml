@@ -66,3 +66,51 @@ sources:
       indicator_id: SP.POP.TOTL
       indicator_label: Population, total
       unit: persons
+
+  - id: worldbank_gdp_total
+    name: World Bank — PIB total (NY.GDP.MKTP.CD)
+    url_template: >-
+      https://api.worldbank.org/v2/country/{iso2}/indicator/NY.GDP.MKTP.CD?format=json&mrnev=1
+    format: json
+    role: indicator
+    transformer: worldbank_indicator
+    meta:
+      indicator_id: NY.GDP.MKTP.CD
+      indicator_label: GDP (current US$)
+      unit: USD
+
+  - id: worldbank_life_expectancy
+    name: World Bank — esperanza de vida (SP.DYN.LE00.IN)
+    url_template: >-
+      https://api.worldbank.org/v2/country/{iso2}/indicator/SP.DYN.LE00.IN?format=json&mrnev=1
+    format: json
+    role: indicator
+    transformer: worldbank_indicator
+    meta:
+      indicator_id: SP.DYN.LE00.IN
+      indicator_label: Life expectancy at birth, total (years)
+      unit: years
+
+  - id: worldbank_urban_population
+    name: World Bank — población urbana (SP.URB.TOTL.IN.ZS)
+    url_template: >-
+      https://api.worldbank.org/v2/country/{iso2}/indicator/SP.URB.TOTL.IN.ZS?format=json&mrnev=1
+    format: json
+    role: indicator
+    transformer: worldbank_indicator
+    meta:
+      indicator_id: SP.URB.TOTL.IN.ZS
+      indicator_label: Urban population (% of total population)
+      unit: percent
+
+  - id: worldbank_unemployment
+    name: World Bank — desempleo (SL.UEM.TOTL.ZS)
+    url_template: >-
+      https://api.worldbank.org/v2/country/{iso2}/indicator/SL.UEM.TOTL.ZS?format=json&mrnev=1
+    format: json
+    role: indicator
+    transformer: worldbank_indicator
+    meta:
+      indicator_id: SL.UEM.TOTL.ZS
+      indicator_label: Unemployment, total (% of total labor force)
+      unit: percent
