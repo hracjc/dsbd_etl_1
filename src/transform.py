@@ -70,12 +70,37 @@ def transform_countries_profile(source: Source, cfg: Config) -> dict[str, pd.Dat
 def transform_worldbank_indicator(source: Source, cfg: Config) -> dict[str, pd.DataFrame]:
     rows = []
     meta = source.meta or {}
-    for country in cfg.focus_countries:
+    country_by_iso3 = {country.iso3: country for country in cfg.focus_countries}
+    raw_path = RAW / f"{source.id}.json"
+    if raw_path.exists():
+        payload = _read_json(raw_path)
+        if isinstance(payload, list) and len(payload) > 1 and payload[1]:
+            for rec in payload[1]:
+                if rec is None:
+                    continue
+                iso3 = rec.get("countryiso3code")
+                country = country_by_iso3.get(iso3)
+                if country is None:
+                    continue
+                rows.append(
+                    {
+                        "iso3": iso3,
+                        "iso2": country.iso2,
+                        "indicator_id": meta.get("indicator_id", source.id),
+                        "indicator_label": meta.get("indicator_label", (rec.get("indicator") or {}).get("value")),
+                        "year": rec.get("date"),
+                        "value": rec.get("value"),
+                        "unit": meta.get("unit"),
+                        "source_id": source.id,
+                    }
+                )
+        return {"indicators": pd.DataFrame(rows)}
+
+    for country in cfg.country_targets:
         path = RAW / f"{source.id}_{country.iso2}.json"
         if not path.exists():
             continue
         payload = _read_json(path)
-        # World Bank: [meta, [records...]]
         if not isinstance(payload, list) or len(payload) < 2 or not payload[1]:
             continue
         for rec in payload[1]:

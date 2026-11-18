@@ -121,7 +121,7 @@ def extract_source(
     latest = state if state is not None else _load_state()
 
     if source.url_template:
-        targets = cfg.focus_countries
+        targets = cfg.country_targets
     else:
         targets = [None]
 

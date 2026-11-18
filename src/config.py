@@ -38,6 +38,10 @@ class Config:
     sources: list[Source]
     focus_countries: list[FocusCountry]
 
+    @property
+    def country_targets(self) -> list[FocusCountry]:
+        return self.focus_countries
+
 
 def load_config(path=SOURCES_YAML) -> Config:
     with open(path, encoding="utf-8") as f:
