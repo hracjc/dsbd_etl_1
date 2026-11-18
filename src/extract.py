@@ -128,7 +128,8 @@ def extract_source(
     for country in targets:
         iso2 = country.iso2 if country else ""
         iso3 = country.iso3 if country else ""
-        url = source.resolve_url(iso2=iso2, iso3=iso3)
+        aliases = cfg.aliases.get(source.id, {})
+        url = source.resolve_url(iso2=aliases.get(iso2, iso2), iso3=aliases.get(iso3, iso3))
         filename = _raw_name(source, iso2 or None)
         dest = RAW / filename
         request = {

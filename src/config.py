@@ -37,6 +37,7 @@ class FocusCountry:
 class Config:
     sources: list[Source]
     focus_countries: list[FocusCountry]
+    aliases: dict[str, dict[str, str]] = field(default_factory=dict)
 
     @property
     def country_targets(self) -> list[FocusCountry]:
@@ -55,4 +56,4 @@ def load_config(path=SOURCES_YAML) -> Config:
     focus = [FocusCountry(row[0], row[1]) for row in reader]
     f.close()
 
-    return Config(sources=sources, focus_countries=focus)
+    return Config(sources=sources, focus_countries=focus, aliases=raw.get("aliases", {}))

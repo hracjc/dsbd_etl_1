@@ -7,6 +7,10 @@
 
 focus_countries: country_list.csv
 
+aliases:
+  eurostat_pop:
+    GR: EL
+
 sources:
   - id: countries_profile
     name: mledoze/countries (perfil e idiomas)

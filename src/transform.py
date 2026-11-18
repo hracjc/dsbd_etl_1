@@ -142,17 +142,19 @@ def transform_owid_life_expectancy(source: Source, cfg: Config) -> dict[str, pd.
     meta = source.meta or {}
     year = str(meta["year"]) if "year" in meta else None
     wanted = {c.iso3 for c in cfg.focus_countries}
+    aliases = cfg.aliases.get(source.id, {})
     # Columnas OWID: Entity, Code, Year, Life expectancy
     code_col = "Code" if "Code" in df.columns else "code"
     year_col = "Year" if "Year" in df.columns else "year"
     value_col = "Life expectancy" if "Life expectancy" in df.columns else df.columns[-1]
     iso2_by_iso3 = {c.iso3: c.iso2 for c in cfg.focus_countries}
-    sub = df[df[code_col].isin(wanted)]
+    df["_iso3"] = df[code_col].map(lambda code: aliases.get(code, code))
+    sub = df[df["_iso3"].isin(wanted)]
     if year is not None:
         sub = sub[sub[year_col].astype(str) == year]
     rows = []
     for _, r in sub.iterrows():
-        iso3 = r[code_col]
+        iso3 = r["_iso3"]
         rows.append(
             {
                 "iso3": iso3,
