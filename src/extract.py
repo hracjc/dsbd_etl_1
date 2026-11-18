@@ -69,6 +69,20 @@ def _record_state(row: dict) -> None:
         writer.writerow(row)
 
 
+def _download(url: str, dest: Path) -> tuple[int, int]:
+    time.sleep(0.2)
+    response = requests.get(
+        url,
+        timeout=TIMEOUT,
+        headers={"User-Agent": USER_AGENT},
+    )
+    status = response.status_code
+    nbytes = len(response.content)
+    if status == 200:
+        dest.write_bytes(response.content)
+    return status, nbytes
+
+
 def extract_source(
     source: Source,
     cfg: Config,
@@ -113,18 +127,11 @@ def extract_source(
         result = "failure, retry later"
         note = ""
         try:
-            time.sleep(0.2)
-            response = requests.get(
-                url,
-                timeout=TIMEOUT,
-                headers={"User-Agent": USER_AGENT},
-            )
-            status = response.status_code
-            nbytes = len(response.content)
-            if status >= 400:
-                raise requests.HTTPError(f"HTTP {status}", response=response)
-            dest.write_bytes(response.content)
-            result = "success"
+            status, nbytes = _download(url, dest)
+            if status == 200:
+                result = "success"
+            else:
+                note = f"HTTP {status}"
         except requests.RequestException as exc:
             if exc.response is not None:
                 status = exc.response.status_code
