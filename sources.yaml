@@ -18,7 +18,7 @@ sources:
   - id: worldbank_gdp
     name: World Bank — PIB per cápita (NY.GDP.PCAP.CD)
     url_template: >-
-      https://api.worldbank.org/v2/country/{iso2}/indicator/NY.GDP.PCAP.CD?format=json&mrnev=1
+      https://api.worldbank.org/v2/country/{iso2}/indicator/NY.GDP.PCAP.CD?format=json
     format: json
     role: indicator
     transformer: worldbank_indicator
@@ -58,7 +58,7 @@ sources:
   - id: worldbank_pop
     name: World Bank — población total (SP.POP.TOTL)
     url_template: >-
-      https://api.worldbank.org/v2/country/{iso2}/indicator/SP.POP.TOTL?format=json&mrnev=1
+      https://api.worldbank.org/v2/country/{iso2}/indicator/SP.POP.TOTL?format=json
     format: json
     role: indicator
     transformer: worldbank_indicator
@@ -70,7 +70,7 @@ sources:
   - id: worldbank_gdp_total
     name: World Bank — PIB total (NY.GDP.MKTP.CD)
     url_template: >-
-      https://api.worldbank.org/v2/country/{iso2}/indicator/NY.GDP.MKTP.CD?format=json&mrnev=1
+      https://api.worldbank.org/v2/country/{iso2}/indicator/NY.GDP.MKTP.CD?format=json
     format: json
     role: indicator
     transformer: worldbank_indicator
@@ -82,7 +82,7 @@ sources:
   - id: worldbank_life_expectancy
     name: World Bank — esperanza de vida (SP.DYN.LE00.IN)
     url_template: >-
-      https://api.worldbank.org/v2/country/{iso2}/indicator/SP.DYN.LE00.IN?format=json&mrnev=1
+      https://api.worldbank.org/v2/country/{iso2}/indicator/SP.DYN.LE00.IN?format=json
     format: json
     role: indicator
     transformer: worldbank_indicator
@@ -94,7 +94,7 @@ sources:
   - id: worldbank_urban_population
     name: World Bank — población urbana (SP.URB.TOTL.IN.ZS)
     url_template: >-
-      https://api.worldbank.org/v2/country/{iso2}/indicator/SP.URB.TOTL.IN.ZS?format=json&mrnev=1
+      https://api.worldbank.org/v2/country/{iso2}/indicator/SP.URB.TOTL.IN.ZS?format=json
     format: json
     role: indicator
     transformer: worldbank_indicator
@@ -106,7 +106,7 @@ sources:
   - id: worldbank_unemployment
     name: World Bank — desempleo (SL.UEM.TOTL.ZS)
     url_template: >-
-      https://api.worldbank.org/v2/country/{iso2}/indicator/SL.UEM.TOTL.ZS?format=json&mrnev=1
+      https://api.worldbank.org/v2/country/{iso2}/indicator/SL.UEM.TOTL.ZS?format=json
     format: json
     role: indicator
     transformer: worldbank_indicator
