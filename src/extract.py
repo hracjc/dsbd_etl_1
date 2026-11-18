@@ -9,6 +9,7 @@ import csv
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from uuid import uuid4
 
 import requests
 
@@ -152,16 +153,19 @@ def extract_source(
 def run_extract(cfg: Config | None = None, force: bool = False) -> Path:
     cfg = cfg or load_config()
     ensure_dirs()
+    run_id = uuid4().hex
     all_rows: list[dict] = []
     state = _load_state()
     for source in cfg.sources:
         print(f"[extract] {source.id} — {source.name}")
         all_rows.extend(extract_source(source, cfg, state, force=force))
 
+    manifest_fields = FIELDNAMES.copy()
+    manifest_fields.append("run_id")
     with MANIFEST.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
+        writer = csv.DictWriter(f, fieldnames=manifest_fields)
         writer.writeheader()
-        writer.writerows(all_rows)
+        writer.writerows({"run_id": run_id, **row} for row in all_rows)
 
     print(f"[extract] manifiesto → {MANIFEST}")
     print(f"[extract] estado → {EXTRACT_STATE_PATH}")
