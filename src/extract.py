@@ -6,6 +6,7 @@ No transforma. Añadir una URL nueva = entrada en sources.yaml.
 from __future__ import annotations
 
 import csv
+import json
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -71,21 +72,41 @@ def _record_state(row: dict) -> None:
         writer.writerow(row)
 
 
-def _download(url: str, dest: Path) -> tuple[int, int]:
+def _request(url: str):
     global _last_request_at
     wait = REQUEST_INTERVAL - (time.monotonic() - _last_request_at)
     if wait > 0:
         time.sleep(wait)
     _last_request_at = time.monotonic()
-    response = requests.get(
-        url,
-        timeout=TIMEOUT,
-        headers={"User-Agent": USER_AGENT},
-    )
+    return requests.get(url, timeout=TIMEOUT, headers={"User-Agent": USER_AGENT})
+
+
+def _download(url: str, dest: Path) -> tuple[int, int]:
+    response = _request(url)
     status = response.status_code
     nbytes = len(response.content)
-    if status == 200:
-        dest.write_bytes(response.content)
+    if status != 200:
+        return status, nbytes
+
+    content = response.content
+    if "api.worldbank.org" in url:
+        payload = json.loads(content)
+        if isinstance(payload, list) and isinstance(payload[0], dict) and isinstance(payload[1], list):
+            pages = int(payload[0].get("pages", 1))
+            records = payload[1]
+            for page in range(2, pages + 1):
+                page_url = f"{url}&page={page}" if "?" in url else f"{url}?page={page}"
+                page_response = _request(page_url)
+                if page_response.status_code != 200:
+                    return page_response.status_code, len(page_response.content)
+                page_payload = json.loads(page_response.content)
+                records.extend(page_payload[1])
+            if len(records) != int(payload[0]["total"]):
+                raise ValueError("World Bank record count does not match total")
+            content = json.dumps(payload).encode("utf-8")
+            nbytes = len(content)
+
+    dest.write_bytes(content)
     return status, nbytes
 
 
