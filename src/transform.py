@@ -234,6 +234,10 @@ def run_transform(cfg: Config | None = None) -> dict[str, pd.DataFrame]:
         df = pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
         if table == "indicators" and "year" in df:
             df["year"] = pd.to_numeric(df["year"], errors="coerce").astype("Int64")
+        if table == "countries":
+            if df["iso3"].duplicated().any():
+                raise ValueError("countries contains duplicate iso3 values")
+            df.to_parquet(CLEAN / "countries.parquet", index=False)
         dest = CLEAN / f"{table}.csv"
         df.to_csv(dest, index=False)
         print(f"[transform] {table}: {len(df)} filas → {dest}")
