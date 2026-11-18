@@ -116,13 +116,12 @@ def extract_source(
             "filename": filename,
         }
         previous = latest.get(_state_key(request))
-        if not force and (
-            previous
-            and previous["status"] == "success"
-            and (RAW / previous["filename"]).is_file()
-        ):
+        if not force and previous and (previous["http_status"] == "404" or previous["status"] == "success" and (RAW / previous["filename"]).is_file()):
             cached = dict(previous)
-            cached["note"] = "Skipped: successful result already exists"
+            if previous["http_status"] == "404":
+                cached["note"] = "HTTP 404; not retrying"
+            else:
+                cached["note"] = "Skipped: successful result already exists"
             rows.append(cached)
             print(f"[extract] {source.id} {iso3 or '-'}: cached")
             continue
@@ -130,12 +129,14 @@ def extract_source(
         now = datetime.now(timezone.utc).isoformat()
         status = 0
         nbytes = 0
-        result = "failure, retry later"
+        result = "failure"
         note = ""
         try:
             status, nbytes = _download(url, dest)
             if status == 200:
                 result = "success"
+            elif status == 404:
+                note = "HTTP 404; not retrying"
             else:
                 note = f"HTTP {status}"
         except requests.RequestException as exc:
