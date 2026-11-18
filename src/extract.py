@@ -6,6 +6,7 @@ No transforma. Añadir una URL nueva = entrada en sources.yaml.
 from __future__ import annotations
 
 import csv
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -111,6 +112,7 @@ def extract_source(
         result = "failure, retry later"
         note = ""
         try:
+            time.sleep(0.2)
             response = requests.get(
                 url,
                 timeout=TIMEOUT,
