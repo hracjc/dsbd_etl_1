@@ -103,14 +103,16 @@ def transform_owid_life_expectancy(source: Source, cfg: Config) -> dict[str, pd.
     raw_path = RAW / f"{source.id}.csv"
     df = pd.read_csv(raw_path)
     meta = source.meta or {}
-    year = str(meta.get("year", "2023"))
+    year = str(meta["year"]) if "year" in meta else None
     wanted = {c.iso3 for c in cfg.focus_countries}
     # Columnas OWID: Entity, Code, Year, Life expectancy
     code_col = "Code" if "Code" in df.columns else "code"
     year_col = "Year" if "Year" in df.columns else "year"
     value_col = "Life expectancy" if "Life expectancy" in df.columns else df.columns[-1]
     iso2_by_iso3 = {c.iso3: c.iso2 for c in cfg.focus_countries}
-    sub = df[(df[code_col].isin(wanted)) & (df[year_col].astype(str) == year)]
+    sub = df[df[code_col].isin(wanted)]
+    if year is not None:
+        sub = sub[sub[year_col].astype(str) == year]
     rows = []
     for _, r in sub.iterrows():
         iso3 = r[code_col]
