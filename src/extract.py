@@ -18,6 +18,8 @@ from .paths import EXTRACT_STATE_PATH, MANIFEST, RAW, ensure_dirs
 
 USER_AGENT = "hracjc-UCJC-DSBD-practica1/1.2"
 TIMEOUT = 60
+REQUEST_INTERVAL = 0.2
+_last_request_at = 0.0
 FIELDNAMES = [
     "timestamp_utc",
     "source_id",
@@ -70,7 +72,11 @@ def _record_state(row: dict) -> None:
 
 
 def _download(url: str, dest: Path) -> tuple[int, int]:
-    time.sleep(0.2)
+    global _last_request_at
+    wait = REQUEST_INTERVAL - (time.monotonic() - _last_request_at)
+    if wait > 0:
+        time.sleep(wait)
+    _last_request_at = time.monotonic()
     response = requests.get(
         url,
         timeout=TIMEOUT,
