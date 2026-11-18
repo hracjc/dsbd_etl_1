@@ -232,6 +232,8 @@ def run_transform(cfg: Config | None = None) -> dict[str, pd.DataFrame]:
     merged: dict[str, pd.DataFrame] = {}
     for table, parts in buckets.items():
         df = pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
+        if table == "indicators" and "year" in df:
+            df["year"] = pd.to_numeric(df["year"], errors="coerce").astype("Int64")
         dest = CLEAN / f"{table}.csv"
         df.to_csv(dest, index=False)
         print(f"[transform] {table}: {len(df)} filas → {dest}")
