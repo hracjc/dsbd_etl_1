@@ -37,9 +37,18 @@ def transform_countries_profile(source: Source, cfg: Config) -> dict[str, pd.Dat
 
     countries_rows = []
     language_rows = []
+    excluded_rows = []
     for item in payload:
         iso3 = item.get("cca3")
         if iso3 not in wanted:
+            excluded_rows.append(
+                {
+                    "source_id": source.id,
+                    "source_code": iso3 or item.get("cca2"),
+                    "name": (item.get("name") or {}).get("common"),
+                    "reason": "missing or unconfigured ISO3",
+                }
+            )
             continue
         name = item.get("name") or {}
         countries_rows.append(
@@ -64,6 +73,9 @@ def transform_countries_profile(source: Source, cfg: Config) -> dict[str, pd.Dat
     return {
         "countries": pd.DataFrame(countries_rows),
         "languages": pd.DataFrame(language_rows),
+        "excluded_entities": pd.DataFrame(
+            excluded_rows, columns=["source_id", "source_code", "name", "reason"]
+        ),
     }
 
 
