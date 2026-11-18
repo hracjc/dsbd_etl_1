@@ -5,7 +5,7 @@ Obligatorio en la Práctica 1 Big Data (ver enunciado):
   - perfil aplanado → countries
   - explosión de idiomas → languages (tabla larga)
   - indicadores en esquema común → indicators
-  - tipado / nulos; join por iso3; join_orphans.csv
+  - tipado / nulos; join por iso3; informe de cobertura
 
 Para una URL nueva: implementad una función y registradla en TRANSFORMERS
 con el mismo nombre que `transformer:` en sources.yaml.
@@ -239,12 +239,17 @@ def run_transform(cfg: Config | None = None) -> dict[str, pd.DataFrame]:
         print(f"[transform] {table}: {len(df)} filas → {dest}")
         merged[table] = df
 
-    # Cobertura del cruce (huérfanos perfil → indicadores)
-    if "countries" in merged and "indicators" in merged:
-        have = set(merged["indicators"]["iso3"].dropna().unique())
-        profile = set(merged["countries"]["iso3"].dropna().unique())
-        orphans = sorted(profile - have)
-        report = pd.DataFrame({"iso3": orphans, "missing_in": "indicators"})
+    if "countries" in merged:
+        profile = set(merged["countries"]["iso3"].dropna())
+        indicators = merged.get("indicators", pd.DataFrame(columns=["iso3", "source_id", "indicator_id"]))
+        have = set(indicators[["iso3", "source_id", "indicator_id"]].dropna().itertuples(index=False, name=None))
+        orphans = [
+            {"iso3": iso3, "source_id": source.id, "indicator_id": (source.meta or {}).get("indicator_id", source.id)}
+            for source in cfg.sources if source.role == "indicator" and source.transformer not in ("generic_passthrough", "countries_profile")
+            for iso3 in profile
+            if (iso3, source.id, (source.meta or {}).get("indicator_id", source.id)) not in have
+        ]
+        report = pd.DataFrame(orphans, columns=["iso3", "source_id", "indicator_id"])
         report_path = CLEAN / "join_orphans.csv"
         report.to_csv(report_path, index=False)
         print(f"[transform] huérfanos del join: {len(orphans)} → {report_path}")
