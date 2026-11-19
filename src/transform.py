@@ -173,6 +173,48 @@ def transform_owid_life_expectancy(source: Source, cfg: Config) -> dict[str, pd.
 def transform_eurostat_demo_pjan(source: Source, cfg: Config) -> dict[str, pd.DataFrame]:
     rows = []
     meta = source.meta or {}
+    raw_path = RAW / f"{source.id}.json"
+    if raw_path.exists():
+        payload = _read_json(raw_path)
+        if "id" in payload and "value" in payload:
+            dimensions = payload["id"]
+            sizes = payload["size"]
+            categories = payload["dimension"]
+            geo_category = categories["geo"]["category"]
+            time_category = categories["time"]["category"]
+            geo_codes = {index: code for code, index in geo_category["index"].items()}
+            time_codes = {index: year for year, index in time_category["index"].items()}
+            country_by_iso2 = {country.iso2: country for country in cfg.focus_countries}
+            aliases = cfg.aliases.get(source.id, {})
+            values = payload["value"]
+            for flat_index, value in (values.items() if isinstance(values, dict) else enumerate(values)):
+                if value is None:
+                    continue
+                flat_index = int(flat_index)
+                coordinates = {}
+                for position, dimension in enumerate(dimensions):
+                    stride = 1
+                    for size in sizes[position + 1:]:
+                        stride *= size
+                    coordinates[dimension] = (flat_index // stride) % sizes[position]
+                source_iso2 = geo_codes.get(coordinates["geo"])
+                iso2 = aliases.get(source_iso2, source_iso2)
+                country = country_by_iso2.get(iso2)
+                if country is None:
+                    continue
+                rows.append(
+                    {
+                        "iso3": country.iso3,
+                        "iso2": country.iso2,
+                        "indicator_id": meta.get("indicator_id", "demo_pjan"),
+                        "indicator_label": meta.get("indicator_label", payload.get("label")),
+                        "year": time_codes.get(coordinates["time"]),
+                        "value": value,
+                        "unit": meta.get("unit", "persons"),
+                        "source_id": source.id,
+                    }
+                )
+            return {"indicators": pd.DataFrame(rows)}
     for country in cfg.focus_countries:
         path = RAW / f"{source.id}_{country.iso2}.json"
         if not path.exists():

@@ -33,8 +33,8 @@ sources:
 
   - id: eurostat_pop
     name: Eurostat — población (demo_pjan)
-    url_template: >-
-      https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_pjan?format=JSON&lang=en&geo={iso2}&sex=T&age=TOTAL&time=2023
+    url: >-
+      https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_pjan?format=JSON&lang=en&freq=A&unit=NR&sex=T&age=TOTAL
     format: json
     role: indicator
     transformer: eurostat_demo_pjan
