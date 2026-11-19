@@ -45,7 +45,6 @@ def _card_markdown(iso3: str, countries: pd.DataFrame, languages: pd.DataFrame,
     comparative = "_Sin indicadores para comparar._"
     if not inds.empty and "region" in countries.columns:
         ind_id = inds.iloc[0]["indicator_id"]
-        region = c["region"]
         year = inds.iloc[0]["year"]
         own_rows = inds[
             (inds["indicator_id"] == ind_id)
