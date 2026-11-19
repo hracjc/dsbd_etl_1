@@ -46,20 +46,32 @@ def _card_markdown(iso3: str, countries: pd.DataFrame, languages: pd.DataFrame,
     if not inds.empty and "region" in countries.columns:
         ind_id = inds.iloc[0]["indicator_id"]
         region = c["region"]
-        peers = countries[countries["region"] == region]["iso3"]
-        peer_vals = indicators[
-            (indicators["iso3"].isin(peers))
-            & (indicators["indicator_id"] == ind_id)
-            & indicators["value"].notna()
-        ]["value"]
-        if not peer_vals.empty:
-            mean_v = peer_vals.astype(float).mean()
-            own = float(inds.iloc[0]["value"])
-            comparative = (
-                f"Respecto a la media de **{region}** en `{ind_id}` "
-                f"({mean_v:,.2f}): este país está en **{own:,.2f}** "
-                f"({'por encima' if own > mean_v else 'por debajo o igual'})."
-            )
+        year = inds.iloc[0]["year"]
+        own_rows = inds[
+            (inds["indicator_id"] == ind_id)
+            & (inds["year"] == year)
+            & inds["value"].notna()
+        ]
+        if own_rows.empty:
+            comparative = f"Sin dato para `{ind_id}` en el año `{year}`."
+        else:
+            region = c["region"]
+            peers = countries[countries["region"] == region]["iso3"]
+            peer_vals = indicators[
+                (indicators["iso3"].isin(peers))
+                & (indicators["indicator_id"] == ind_id)
+                & (indicators["year"] == year)
+                & indicators["value"].notna()
+            ]["value"]
+            if not peer_vals.empty:
+                median_v = peer_vals.astype(float).median()
+                own = float(own_rows.iloc[0]["value"])
+                comparative = (
+                    f"Respecto a la mediana de **{region}** en `{ind_id}` "
+                    f"para el año `{year}` ({median_v:,.2f}): este país está en "
+                    f"**{own:,.2f}** "
+                    f"({'por encima' if own > median_v else 'por debajo o igual'})."
+                )
 
     return f"""# Ficha país — {c['name_common']} ({iso3})
 
