@@ -252,6 +252,11 @@ def run_transform(cfg: Config | None = None) -> dict[str, pd.DataFrame]:
             if df["iso3"].duplicated().any():
                 raise ValueError("countries contains duplicate iso3 values")
             df.to_parquet(CLEAN / "countries.parquet", index=False)
+        if table == "indicators" and {"indicator_id", "iso3", "year", "source_id", "value"}.issubset(df.columns):
+            indicators_dir = CLEAN / "indicators"
+            df.to_parquet(indicators_dir, index=False, partition_cols=["indicator_id"])
+        if table == "languages":
+            df.to_parquet(CLEAN / "languages.parquet", index=False)
         dest = CLEAN / f"{table}.csv"
         df.to_csv(dest, index=False)
         print(f"[transform] {table}: {len(df)} filas → {dest}")
