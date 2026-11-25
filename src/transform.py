@@ -280,7 +280,7 @@ def run_transform(cfg: Config | None = None) -> dict[str, pd.DataFrame]:
                 f"Transformer '{name}' no registrado. "
                 f"Disponibles: {sorted(TRANSFORMERS)}"
             )
-        print(f"[transform] {source.id} → {name}")
+        print(f"[transform] {source.id} -> {name}")
         out = TRANSFORMERS[name](source, cfg)
         for table, df in out.items():
             buckets.setdefault(table, []).append(df)

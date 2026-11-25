@@ -27,7 +27,7 @@ def run_load(write_parquet: bool = False) -> Path:
                 continue
             df = pd.read_csv(csv_path)
             df.to_sql(name, conn, index=False, if_exists="replace")
-            print(f"[load] {name}: {len(df)} filas → sqlite")
+            print(f"[load] {name}: {len(df)} filas -> sqlite")
             if write_parquet:
                 pq = SERVING / f"{name}.parquet"
                 try:
