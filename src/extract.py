@@ -193,7 +193,7 @@ def run_extract(cfg: Config | None = None, force: bool = False) -> Path:
     all_rows: list[dict] = []
     state = _load_state()
     for source in cfg.sources:
-        print(f"[extract] {source.id} — {source.name}")
+        print(f"[extract] {source.id} - {source.name}")
         all_rows.extend(extract_source(source, cfg, state, force=force))
 
     manifest_fields = FIELDNAMES.copy()
